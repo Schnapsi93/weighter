@@ -2,10 +2,16 @@ package com.aljaz.weighttracker.di
 
 import android.content.Context
 import androidx.room.Room
+import com.aljaz.weighttracker.data.backup.BackupManager
+import com.aljaz.weighttracker.data.backup.BackupSettingsStore
+import com.aljaz.weighttracker.data.backup.NextcloudClient
+import com.aljaz.weighttracker.data.backup.SecretCipher
 import com.aljaz.weighttracker.data.csv.CsvTransfer
 import com.aljaz.weighttracker.data.local.WeightDatabase
 import com.aljaz.weighttracker.data.repository.RoomWeightRepository
 import com.aljaz.weighttracker.data.repository.WeightRepository
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 /**
  * Manual dependency container for the whole app.
@@ -40,5 +46,24 @@ class AppContainer(private val context: Context) {
     /** CSV export/import, shared by the Settings screen and (later) backups. */
     val csvTransfer: CsvTransfer by lazy {
         CsvTransfer(context.contentResolver, weightRepository)
+    }
+
+    /** Shared HTTP client; one instance reuses connections efficiently. */
+    private val httpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    /** Saved Nextcloud connection and backup status. */
+    val backupSettings: BackupSettingsStore by lazy {
+        BackupSettingsStore(context, SecretCipher())
+    }
+
+    /** Creates Nextcloud backups (manual now, scheduled in Milestone 8). */
+    val backupManager: BackupManager by lazy {
+        BackupManager(weightRepository, NextcloudClient(httpClient), backupSettings)
     }
 }

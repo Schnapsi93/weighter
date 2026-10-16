@@ -65,4 +65,35 @@
     <string name="import_dialog_unchanged">Days already identical: %1$d</string>
     <string name="import_dialog_skipped">Unreadable lines that will be skipped: %1$s</string>
     <string name="action_import">Import</string>
+
+    <!-- Nextcloud backup -->
+    <string name="nextcloud_title">Nextcloud backup</string>
+    <string name="nextcloud_description">Uploads your complete history as a CSV file to the folder \"WeightTracker\" in your Nextcloud. One file is kept per month.</string>
+    <string name="nextcloud_server_url">Server address</string>
+    <string name="nextcloud_server_hint">cloud.example.com</string>
+    <string name="nextcloud_username">Username</string>
+    <string name="nextcloud_app_password">App password</string>
+    <string name="nextcloud_app_password_help">Create one in Nextcloud: Settings → Security → Devices &amp; sessions.</string>
+    <string name="nextcloud_show_password">Show password</string>
+    <string name="nextcloud_hide_password">Hide password</string>
+    <string name="nextcloud_connect">Connect</string>
+    <string name="nextcloud_backup_now">Back up now</string>
+    <string name="nextcloud_disconnect">Disconnect</string>
+    <string name="nextcloud_last_backup">Last backup: %1$s</string>
+    <string name="nextcloud_last_backup_never">No backup yet</string>
+    <string name="nextcloud_last_error">Last attempt failed: %1$s</string>
+    <string name="nextcloud_connected">Connected to Nextcloud</string>
+    <string name="nextcloud_connection_failed">Connection failed: %1$s</string>
+    <string name="nextcloud_incomplete">Please fill in the server address, username and app password.</string>
+    <string name="nextcloud_backup_done">Backup uploaded</string>
+    <string name="nextcloud_backup_failed">Backup failed: %1$s</string>
+    <string name="nextcloud_disconnected">Nextcloud disconnected</string>
+
+    <!-- Backup errors (used inside the messages above) -->
+    <string name="backup_error_not_configured">Nextcloud is not set up</string>
+    <string name="backup_error_invalid_url">invalid server address (https is required)</string>
+    <string name="backup_error_unauthorized">wrong username or app password</string>
+    <string name="backup_error_not_found">not found, check the server address and username</string>
+    <string name="backup_error_network">the server could not be reached</string>
+    <string name="backup_error_server">the server returned an error</string>
 </resources>

@@ -1,7 +1,9 @@
 package com.aljaz.weighttracker.util
 
 import java.text.DecimalFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -32,4 +34,10 @@ object WeightFormatter {
      */
     fun formatForInput(weightKg: Double): String =
         DecimalFormat("0.##").format(weightKg)
+
+    /** Formats a moment as local date and time, e.g. "16 Oct 2026, 23:15". */
+    fun formatDateTime(instant: Instant): String =
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+            .withZone(ZoneId.systemDefault())
+            .format(instant)
 }

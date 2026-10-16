@@ -75,4 +75,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.vico.compose)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences)
 }

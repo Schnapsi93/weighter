@@ -36,6 +36,8 @@ object AppViewModelProvider {
             SettingsViewModel(
                 csvTransfer = container.csvTransfer,
                 repository = container.weightRepository,
+                backupManager = container.backupManager,
+                backupSettings = container.backupSettings,
             )
         }
     }
