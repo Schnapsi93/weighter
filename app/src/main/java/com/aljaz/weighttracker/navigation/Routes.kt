@@ -17,13 +17,11 @@ import kotlinx.serialization.Serializable
  * `@Serializable data class EditEntryRoute(val entryId: Long)`.
  */
 
-/** Screen for entering today's weight (start screen). */
-@Serializable object AddWeightRoute
 
 /** List of all past entries. */
 @Serializable object HistoryRoute
 
-/** Line chart of weight over time. */
+/** Line chart and statistics – the start screen. */
 @Serializable object ChartRoute
 
 /** App settings (Nextcloud backup, export…). */

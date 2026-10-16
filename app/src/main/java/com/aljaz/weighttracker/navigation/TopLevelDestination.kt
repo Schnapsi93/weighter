@@ -26,9 +26,8 @@ enum class TopLevelDestination(
     val icon: ImageVector,
     @StringRes val labelRes: Int,
 ) {
-    ADD_WEIGHT(AddWeightRoute, Icons.Filled.Add, R.string.nav_add_weight),
-    HISTORY(HistoryRoute, Icons.AutoMirrored.Filled.List, R.string.nav_history),
     CHART(ChartRoute, Icons.Filled.Insights, R.string.nav_chart),
+    HISTORY(HistoryRoute, Icons.AutoMirrored.Filled.List, R.string.nav_history),
     SETTINGS(SettingsRoute, Icons.Filled.Settings, R.string.nav_settings),
 }
 

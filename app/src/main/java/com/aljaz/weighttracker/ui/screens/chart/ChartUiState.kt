@@ -3,6 +3,7 @@ package com.aljaz.weighttracker.ui.screens.chart
 import androidx.annotation.StringRes
 import com.aljaz.weighttracker.R
 import com.aljaz.weighttracker.model.WeightEntry
+import com.aljaz.weighttracker.ui.components.editor.EditorState
 import java.time.LocalDate
 import kotlin.math.sqrt
 
@@ -14,11 +15,15 @@ import kotlin.math.sqrt
  * @property entries Entries inside the selected range, oldest first.
  * @property stats Statistics for [entries], or null if there are none.
  * @property isLoading True until the first data arrives.
+ * @property todayEntry Today's saved entry, or null if not entered yet.
+ * @property editor State of the add/edit dialog, or null when closed.
  */
 data class ChartUiState(
     val selectedRange: ChartRange = ChartRange.DAYS_30,
     val entries: List<WeightEntry> = emptyList(),
     val stats: ChartStats? = null,
+    val todayEntry: WeightEntry? = null,
+    val editor: EditorState? = null,
     val isLoading: Boolean = true,
 )
 

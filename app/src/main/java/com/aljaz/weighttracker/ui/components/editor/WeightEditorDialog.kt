@@ -1,4 +1,4 @@
-package com.aljaz.weighttracker.ui.screens.history
+package com.aljaz.weighttracker.ui.components.editor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,7 +44,7 @@ import java.time.LocalDate
  * @param onDateChange Called with a newly picked date (add mode only).
  * @param onInputChange Called when the weight text changes.
  * @param onSave Called when the user taps Save or keyboard Done.
- * @param onDelete Called when the user taps Delete (edit mode only).
+ * @param onDelete Called when the user taps Delete. If null, no Delete button is shown.
  * @param onDismiss Called when the dialog should close without saving.
  */
 @Composable
@@ -53,7 +53,7 @@ fun WeightEditorDialog(
     onDateChange: (LocalDate) -> Unit,
     onInputChange: (String) -> Unit,
     onSave: () -> Unit,
-    onDelete: () -> Unit,
+    onDelete: (() -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     // Pure UI state (is the calendar open?), so it lives here, not in the ViewModel.
@@ -111,7 +111,7 @@ fun WeightEditorDialog(
         },
         dismissButton = {
             Row {
-                if (!state.isNewEntry) {
+                if (!state.isNewEntry && onDelete != null) {
                     TextButton(onClick = onDelete) {
                         Text(
                             text = stringResource(R.string.action_delete),

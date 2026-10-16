@@ -16,7 +16,7 @@ import com.aljaz.weighttracker.util.WeightInputError
 /**
  * Text field for entering a weight in kg, with a decimal keyboard,
  * a "kg" suffix and a validation message underneath.
- * Used by the Today screen and the History editor dialog.
+ * Used by [WeightEditorDialog].
  *
  * @param value Current text.
  * @param onValueChange Called with the new text on every keystroke.
@@ -35,8 +35,8 @@ fun WeightTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(stringResource(R.string.add_weight_label)) },
-        suffix = { Text(stringResource(R.string.add_weight_unit)) },
+        label = { Text(stringResource(R.string.weight_label)) },
+        suffix = { Text(stringResource(R.string.weight_unit)) },
         isError = error != null,
         // Always present, so the layout doesn't jump when an error appears.
         supportingText = { error?.let { Text(inputErrorMessage(it)) } },

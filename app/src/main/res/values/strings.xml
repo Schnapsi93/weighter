@@ -1,25 +1,17 @@
 <resources>
     <string name="app_name">Weight Tracker</string>
-    <string name="nav_add_weight">Today</string>
     <string name="nav_history">History</string>
     <string name="nav_chart">Chart</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Add weight screen -->
-    <string name="add_weight_label">Weight</string>
-    <string name="add_weight_unit">kg</string>
-    <string name="add_weight_save">Save</string>
-    <string name="add_weight_update">Update today\'s weight</string>
-    <string name="add_weight_today_value">Today: %1$s</string>
-    <string name="add_weight_today_empty">No weight entered today yet.</string>
-    <string name="add_weight_previous">Last entry: %1$s on %2$s</string>
-    <string name="add_weight_change">Change: %1$s</string>
+    <string name="weight_label">Weight</string>
+    <string name="weight_unit">kg</string>
 
     <!-- Input errors -->
     <string name="error_weight_empty">Please enter your weight.</string>
     <string name="error_weight_not_number">That is not a valid number.</string>
     <string name="error_weight_out_of_range">Weight must be between %1$d and %2$d kg.</string>
-    <string name="error_save_failed">Saving failed. Please try again.</string>
 
     <!-- History screen -->
     <string name="history_empty">No entries yet.\nYour saved weights will appear here.</string>
@@ -51,4 +43,7 @@
     <string name="chart_stat_highest">Highest</string>
     <string name="chart_stat_average">Average</string>
     <string name="chart_stat_std_dev">Standard deviation</string>
+
+    <string name="chart_fab_add_today">Add today</string>
+    <string name="chart_fab_today_value">Today: %1$s</string>
 </resources>

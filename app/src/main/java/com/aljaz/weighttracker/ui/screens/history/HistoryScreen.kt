@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aljaz.weighttracker.R
 import com.aljaz.weighttracker.model.WeightEntry
 import com.aljaz.weighttracker.ui.AppViewModelProvider
+import com.aljaz.weighttracker.ui.components.editor.WeightEditorDialog
 import com.aljaz.weighttracker.ui.theme.WeightTrackerTheme
 import com.aljaz.weighttracker.util.WeightFormatter
 import java.time.LocalDate
@@ -62,14 +63,14 @@ fun HistoryScreen(
         modifier = modifier,
     )
 
-    uiState.editor?.let { editor ->
+    uiState.editor?.let { editorState ->
         WeightEditorDialog(
-            state = editor,
-            onDateChange = viewModel::onEditorDateChange,
-            onInputChange = viewModel::onEditorInputChange,
-            onSave = viewModel::onEditorSave,
+            state = editorState,
+            onDateChange = viewModel.editor::onDateChange,
+            onInputChange = viewModel.editor::onInputChange,
+            onSave = viewModel.editor::save,
             onDelete = viewModel::onEditorDelete,
-            onDismiss = viewModel::onEditorDismiss,
+            onDismiss = viewModel.editor::dismiss,
         )
     }
 }
