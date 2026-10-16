@@ -4,4 +4,19 @@
     <string name="nav_history">History</string>
     <string name="nav_chart">Chart</string>
     <string name="nav_settings">Settings</string>
+    <!-- Add weight screen -->
+    <string name="add_weight_label">Weight</string>
+    <string name="add_weight_unit">kg</string>
+    <string name="add_weight_save">Save</string>
+    <string name="add_weight_update">Update today\'s weight</string>
+    <string name="add_weight_today_value">Today: %1$s</string>
+    <string name="add_weight_today_empty">No weight entered today yet.</string>
+    <string name="add_weight_previous">Last entry: %1$s on %2$s</string>
+    <string name="add_weight_change">Change: %1$s</string>
+
+    <!-- Input errors -->
+    <string name="error_weight_empty">Please enter your weight.</string>
+    <string name="error_weight_not_number">That is not a valid number.</string>
+    <string name="error_weight_out_of_range">Weight must be between %1$d and %2$d kg.</string>
+    <string name="error_save_failed">Saving failed. Please try again.</string>
 </resources>

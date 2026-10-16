@@ -1,0 +1,28 @@
+package com.aljaz.weighttracker.ui
+
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.aljaz.weighttracker.WeightTrackerApp
+import com.aljaz.weighttracker.ui.screens.add.AddWeightViewModel
+
+/**
+ * Creates every ViewModel in the app with its dependencies from [AppContainer].
+ *
+ * To add a ViewModel: add one `initializer { }` block below.
+ */
+object AppViewModelProvider {
+
+    val Factory = viewModelFactory {
+        initializer {
+            AddWeightViewModel(
+                repository = weightTrackerApp().container.weightRepository,
+            )
+        }
+    }
+}
+
+/** Gets our [WeightTrackerApp] instance inside a ViewModel initializer. */
+private fun CreationExtras.weightTrackerApp(): WeightTrackerApp =
+    this[APPLICATION_KEY] as WeightTrackerApp
