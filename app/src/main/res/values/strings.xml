@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Weight Tracker</string>
+    <string name="app_name">Weighter</string>
     <string name="nav_history">History</string>
     <string name="nav_chart">Chart</string>
     <string name="nav_settings">Settings</string>
@@ -68,7 +68,7 @@
 
     <!-- Nextcloud backup -->
     <string name="nextcloud_title">Nextcloud backup</string>
-    <string name="nextcloud_description">Uploads your complete history as a CSV file to the folder \"WeightTracker\" in your Nextcloud. One file is kept per month.</string>
+    <string name="nextcloud_description">Uploads your complete history as a CSV file to the folder \"Weighter\" in your Nextcloud. One file is kept per month.</string>
     <string name="nextcloud_server_url">Server address</string>
     <string name="nextcloud_server_hint">cloud.example.com</string>
     <string name="nextcloud_username">Username</string>
@@ -96,4 +96,7 @@
     <string name="backup_error_not_found">not found, check the server address and username</string>
     <string name="backup_error_network">the server could not be reached</string>
     <string name="backup_error_server">the server returned an error</string>
+
+    <string name="nextcloud_auto_backup">Automatic monthly backup</string>
+    <string name="nextcloud_auto_backup_description">Runs once a month when the phone is online. If it fails, it is retried automatically.</string>
 </resources>

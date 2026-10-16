@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -74,6 +77,7 @@ data class NextcloudActions(
     val onPasswordChange: (String) -> Unit,
     val onConnect: () -> Unit,
     val onBackupNow: () -> Unit,
+    val onAutoBackupChange: (Boolean) -> Unit,
     val onDisconnect: () -> Unit,
 )
 
@@ -108,6 +112,7 @@ fun SettingsScreen(
             onPasswordChange = viewModel::onPasswordChange,
             onConnect = viewModel::onConnect,
             onBackupNow = viewModel::onBackupNow,
+            onAutoBackupChange = viewModel::onAutoBackupChange,
             onDisconnect = viewModel::onDisconnect,
         )
     }
@@ -184,6 +189,7 @@ fun SettingsContent(
                 form = uiState.nextcloudForm,
                 isConnected = uiState.isConnected,
                 status = uiState.backupStatus,
+                autoBackupEnabled = uiState.autoBackupEnabled,
                 isWorking = uiState.isWorking,
                 actions = nextcloudActions,
             )
@@ -238,11 +244,13 @@ private fun DataCard(
 
 /**
  * Card for the Nextcloud connection: login fields, Connect, and,
- * once connected, the backup status with Back up now / Disconnect.
+ * once connected, the backup status, the automatic backup switch,
+ * Back up now and Disconnect.
  *
  * @param form Text currently in the fields.
  * @param isConnected True if a connection is saved.
  * @param status Result of the latest backups.
+ * @param autoBackupEnabled Current state of the automatic backup switch.
  * @param isWorking Disables the buttons while an operation runs.
  * @param actions Callbacks for user actions.
  */
@@ -251,6 +259,7 @@ private fun NextcloudCard(
     form: NextcloudForm,
     isConnected: Boolean,
     status: BackupStatus,
+    autoBackupEnabled: Boolean,
     isWorking: Boolean,
     actions: NextcloudActions,
 ) {
@@ -338,6 +347,12 @@ private fun NextcloudCard(
             if (isConnected) {
                 BackupStatusText(status)
 
+                AutoBackupSwitch(
+                    checked = autoBackupEnabled,
+                    enabled = !isWorking,
+                    onCheckedChange = actions.onAutoBackupChange,
+                )
+
                 Button(
                     onClick = actions.onBackupNow,
                     enabled = !isWorking,
@@ -351,6 +366,43 @@ private fun NextcloudCard(
                 ) { Text(stringResource(R.string.nextcloud_disconnect)) }
             }
         }
+    }
+}
+
+/**
+ * Row with the "Automatic monthly backup" title, a short explanation
+ * and an on/off switch.
+ *
+ * @param checked Whether automatic backups are on.
+ * @param enabled False to disable the switch (e.g. while working).
+ * @param onCheckedChange Called with the new value when toggled.
+ */
+@Composable
+private fun AutoBackupSwitch(
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.nextcloud_auto_backup),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = stringResource(R.string.nextcloud_auto_backup_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+        )
     }
 }
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aljaz.weighttracker.data.backup.BackupError
 import com.aljaz.weighttracker.data.backup.BackupManager
+import com.aljaz.weighttracker.data.backup.BackupScheduler
 import com.aljaz.weighttracker.data.backup.BackupSettingsStore
 import com.aljaz.weighttracker.data.backup.NextcloudClient
 import com.aljaz.weighttracker.data.backup.NextcloudConfig
@@ -24,13 +25,14 @@ import java.time.LocalDate
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Logic for the Settings screen: CSV export/import (with preview) and
- * the Nextcloud connection with manual backups.
+ * Logic for the Settings screen: CSV export/import (with preview),
+ * the Nextcloud connection, manual backups and the automatic monthly backup.
  *
  * @param csvTransfer Reads and writes CSV files.
  * @param repository Used to compare imported data with existing entries.
  * @param backupManager Tests connections and creates backups.
- * @param backupSettings Saved connection and backup status.
+ * @param backupSettings Saved connection, backup status and auto-backup switch.
+ * @param backupScheduler Schedules/cancels the automatic monthly backup.
  * @param today Returns the current date (used in the export file name).
  */
 class SettingsViewModel(
@@ -38,16 +40,26 @@ class SettingsViewModel(
     private val repository: WeightRepository,
     private val backupManager: BackupManager,
     private val backupSettings: BackupSettingsStore,
+    private val backupScheduler: BackupScheduler,
     private val today: () -> LocalDate = { LocalDate.now() },
 ) : ViewModel() {
 
     /** State owned by this screen (form text, dialogs, messages). */
     private val local = MutableStateFlow(SettingsUiState())
 
-    /** Complete screen state: local state plus saved connection and backup status. */
+    /** Complete screen state: local state plus everything saved in settings. */
     val uiState: StateFlow<SettingsUiState> =
-        combine(local, backupSettings.config, backupSettings.status) { state, config, status ->
-            state.copy(isConnected = config != null, backupStatus = status)
+        combine(
+            local,
+            backupSettings.config,
+            backupSettings.status,
+            backupSettings.autoBackupEnabled,
+        ) { state, config, status, autoBackup ->
+            state.copy(
+                isConnected = config != null,
+                backupStatus = status,
+                autoBackupEnabled = autoBackup,
+            )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -67,8 +79,8 @@ class SettingsViewModel(
 
     // ---------- CSV export / import ----------
 
-    /** Suggested name for the export file, e.g. "weight-tracker-2026-10-16.csv". */
-    fun exportFileName(): String = "weight-tracker-${today()}.csv"
+    /** Suggested name for the export file, e.g. "weighter-2026-10-16.csv". */
+    fun exportFileName(): String = "weighter-${today()}.csv"
 
     /** Writes all entries to the file the user just created at [uri]. */
     fun onExportTo(uri: Uri) = runWork(failure = SettingsMessage.ExportFailed) {
@@ -107,7 +119,10 @@ class SettingsViewModel(
     fun onUsernameChange(value: String) = updateForm { it.copy(username = value) }
     fun onPasswordChange(value: String) = updateForm { it.copy(password = value) }
 
-    /** Tests the typed details and saves them only if the connection works. */
+    /**
+     * Tests the typed details and saves them only if the connection works.
+     * On success, the automatic backup is scheduled (if switched on).
+     */
     fun onConnect() {
         val form = local.value.nextcloudForm
         if (form.serverUrl.isBlank() || form.username.isBlank() || form.password.isBlank()) {
@@ -125,6 +140,7 @@ class SettingsViewModel(
             when (val result = backupManager.testConnection(config)) {
                 NextcloudResult.Success -> {
                     backupSettings.saveConfig(config)
+                    if (backupSettings.autoBackupEnabled.first()) backupScheduler.schedule()
                     updateForm { it.copy(serverUrl = url) }  // show the cleaned-up address
                     SettingsMessage.Connected
                 }
@@ -141,9 +157,19 @@ class SettingsViewModel(
         }
     }
 
-    /** Removes the saved connection and clears the form. */
+    /** Switches the automatic monthly backup on or off. */
+    fun onAutoBackupChange(enabled: Boolean) {
+        viewModelScope.launch {
+            backupSettings.setAutoBackupEnabled(enabled)
+            val isConnected = backupSettings.config.first() != null
+            if (enabled && isConnected) backupScheduler.schedule() else backupScheduler.cancel()
+        }
+    }
+
+    /** Stops automatic backups, removes the saved connection and clears the form. */
     fun onDisconnect() {
         viewModelScope.launch {
+            backupScheduler.cancel()
             backupSettings.clear()
             local.update {
                 it.copy(nextcloudForm = NextcloudForm(), message = SettingsMessage.Disconnected)

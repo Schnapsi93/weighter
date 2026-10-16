@@ -7,6 +7,8 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import com.aljaz.weighttracker.BuildConfig
 
 /**
  * Creates backups: exports all entries as CSV, uploads them to Nextcloud
@@ -50,12 +52,41 @@ class BackupManager(
         return result
     }
 
+    /**
+     * Backs up only if no backup has succeeded yet in the current calendar month.
+     * Called daily by the background job.
+     *
+     * @return The backup result, or null if no backup was needed.
+     */
+    suspend fun backupIfDue(): NextcloudResult? {
+        val lastSuccess = settings.status.first().lastSuccessAt
+        if (!isBackupDue(lastSuccess, Instant.now(clock), clock.zone)) return null
+        return backupNow()
+    }
+
     companion object {
         /** Folder in the user's Nextcloud where backups are stored. */
-        const val BACKUP_FOLDER = "WeightTracker"
+        /**
+         * Folder in the user's Nextcloud where backups are stored.
+         * Debug builds use a separate folder so test data never
+         * overwrites real backups.
+         */
+        val BACKUP_FOLDER = if (BuildConfig.DEBUG) "Weighter-debug" else "Weighter"
 
         /** Backup file name for the month of [date], e.g. "weight-tracker-2026-10.csv". */
         fun fileNameFor(date: LocalDate): String =
-            "weight-tracker-${YearMonth.from(date)}.csv"
+            "weighter-${YearMonth.from(date)}.csv"
+
+        /**
+         * True if no backup has succeeded in the calendar month of [now].
+         *
+         * @param lastSuccess Time of the last successful backup, or null if never.
+         * @param now The current time.
+         * @param zone Time zone that defines where a month starts and ends.
+         */
+        fun isBackupDue(lastSuccess: Instant?, now: Instant, zone: ZoneId): Boolean {
+            if (lastSuccess == null) return true
+            return YearMonth.from(lastSuccess.atZone(zone)) != YearMonth.from(now.atZone(zone))
+        }
     }
 }

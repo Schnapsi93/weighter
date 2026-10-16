@@ -56,7 +56,7 @@ class NextcloudUrlTest {
     @Test
     fun backupFileName_isPerMonth() {
         assertEquals(
-            "weight-tracker-2026-10.csv",
+            "weighter-2026-10.csv",
             BackupManager.fileNameFor(LocalDate.of(2026, 10, 16)),
         )
     }

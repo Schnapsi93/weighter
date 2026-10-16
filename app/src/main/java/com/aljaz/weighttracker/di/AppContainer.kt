@@ -2,7 +2,9 @@ package com.aljaz.weighttracker.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.aljaz.weighttracker.data.backup.BackupManager
+import com.aljaz.weighttracker.data.backup.BackupScheduler
 import com.aljaz.weighttracker.data.backup.BackupSettingsStore
 import com.aljaz.weighttracker.data.backup.NextcloudClient
 import com.aljaz.weighttracker.data.backup.SecretCipher
@@ -65,5 +67,9 @@ class AppContainer(private val context: Context) {
     /** Creates Nextcloud backups (manual now, scheduled in Milestone 8). */
     val backupManager: BackupManager by lazy {
         BackupManager(weightRepository, NextcloudClient(httpClient), backupSettings)
+    }
+    /** Schedules or cancels the automatic monthly backup. */
+    val backupScheduler: BackupScheduler by lazy {
+        BackupScheduler(WorkManager.getInstance(context))
     }
 }

@@ -13,6 +13,7 @@ import com.aljaz.weighttracker.model.WeightEntry
  * @property nextcloudForm What is typed into the Nextcloud fields.
  * @property isConnected True if a Nextcloud connection is saved.
  * @property backupStatus Result of the latest backups.
+ * @property autoBackupEnabled True if automatic monthly backups are switched on.
  */
 data class SettingsUiState(
     val isWorking: Boolean = false,
@@ -21,6 +22,7 @@ data class SettingsUiState(
     val nextcloudForm: NextcloudForm = NextcloudForm(),
     val isConnected: Boolean = false,
     val backupStatus: BackupStatus = BackupStatus(),
+    val autoBackupEnabled: Boolean = true,
 )
 
 /** Text currently typed into the Nextcloud fields (not yet saved). */

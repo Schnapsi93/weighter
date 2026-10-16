@@ -38,6 +38,7 @@ object AppViewModelProvider {
                 repository = container.weightRepository,
                 backupManager = container.backupManager,
                 backupSettings = container.backupSettings,
+                backupScheduler = container.backupScheduler,
             )
         }
     }

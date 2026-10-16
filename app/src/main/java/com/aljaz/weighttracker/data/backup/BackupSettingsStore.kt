@@ -3,6 +3,7 @@ package com.aljaz.weighttracker.data.backup
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -55,6 +56,11 @@ class BackupSettingsStore(
         )
     }
 
+    /** Whether automatic monthly backups are switched on (default: on). */
+    val autoBackupEnabled: Flow<Boolean> = preferences.map { prefs ->
+        prefs[KEY_AUTO_BACKUP] ?: true
+    }
+
     /** Saves [config], encrypting the password. Clears any previous error. */
     suspend fun saveConfig(config: NextcloudConfig) {
         dataStore.edit { prefs ->
@@ -83,11 +89,17 @@ class BackupSettingsStore(
         dataStore.edit { it[KEY_LAST_ERROR] = error.name }
     }
 
+    /** Switches automatic monthly backups on or off. */
+    suspend fun setAutoBackupEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_AUTO_BACKUP] = enabled }
+    }
+
     private companion object {
         val KEY_SERVER_URL = stringPreferencesKey("server_url")
         val KEY_USERNAME = stringPreferencesKey("username")
         val KEY_PASSWORD = stringPreferencesKey("app_password_encrypted")
         val KEY_LAST_SUCCESS_MILLIS = longPreferencesKey("last_success_millis")
         val KEY_LAST_ERROR = stringPreferencesKey("last_error")
+        val KEY_AUTO_BACKUP = booleanPreferencesKey("auto_backup_enabled")
     }
 }
