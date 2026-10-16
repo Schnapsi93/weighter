@@ -46,4 +46,23 @@
 
     <string name="chart_fab_add_today">Add today</string>
     <string name="chart_fab_today_value">Today: %1$s</string>
+
+    <!-- Settings screen -->
+    <string name="settings_data_title">Your data</string>
+    <string name="settings_data_description">Export all entries to a CSV file, or import entries from one. Importing adds new days and replaces existing days with the values from the file.</string>
+    <string name="settings_export">Export to CSV</string>
+    <string name="settings_import">Import from CSV</string>
+    <string name="settings_exported">Exported %1$d entries</string>
+    <string name="settings_export_failed">Export failed. Please try another location.</string>
+    <string name="settings_imported">Imported %1$d entries</string>
+    <string name="settings_import_failed">The file could not be read.</string>
+    <string name="settings_import_nothing">No valid entries found in the file (%1$d lines could not be read).</string>
+
+    <!-- Import preview dialog -->
+    <string name="import_dialog_title">Import data?</string>
+    <string name="import_dialog_new">New days: %1$d</string>
+    <string name="import_dialog_replaced">Existing days that will be replaced: %1$d</string>
+    <string name="import_dialog_unchanged">Days already identical: %1$d</string>
+    <string name="import_dialog_skipped">Unreadable lines that will be skipped: %1$s</string>
+    <string name="action_import">Import</string>
 </resources>

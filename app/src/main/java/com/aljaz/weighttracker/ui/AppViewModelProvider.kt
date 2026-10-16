@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.aljaz.weighttracker.WeightTrackerApp
 import com.aljaz.weighttracker.ui.screens.chart.ChartViewModel
 import com.aljaz.weighttracker.ui.screens.history.HistoryViewModel
+import com.aljaz.weighttracker.ui.screens.settings.SettingsViewModel
 
 /**
  * Creates every ViewModel in the app with its dependencies from [AppContainer].
@@ -27,6 +28,14 @@ object AppViewModelProvider {
         initializer {
             ChartViewModel(
                 repository = weightTrackerApp().container.weightRepository,
+            )
+        }
+
+        initializer {
+            val container = weightTrackerApp().container
+            SettingsViewModel(
+                csvTransfer = container.csvTransfer,
+                repository = container.weightRepository,
             )
         }
     }

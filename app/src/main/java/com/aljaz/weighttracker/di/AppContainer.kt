@@ -2,6 +2,7 @@ package com.aljaz.weighttracker.di
 
 import android.content.Context
 import androidx.room.Room
+import com.aljaz.weighttracker.data.csv.CsvTransfer
 import com.aljaz.weighttracker.data.local.WeightDatabase
 import com.aljaz.weighttracker.data.repository.RoomWeightRepository
 import com.aljaz.weighttracker.data.repository.WeightRepository
@@ -34,5 +35,10 @@ class AppContainer(private val context: Context) {
     /** Repository used by all screens to read and write weight entries. */
     val weightRepository: WeightRepository by lazy {
         RoomWeightRepository(database.weightEntryDao())
+    }
+
+    /** CSV export/import, shared by the Settings screen and (later) backups. */
+    val csvTransfer: CsvTransfer by lazy {
+        CsvTransfer(context.contentResolver, weightRepository)
     }
 }
