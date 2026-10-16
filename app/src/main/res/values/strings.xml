@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Weight Tracker</string>
+    <string name="nav_add_weight">Today</string>
+    <string name="nav_history">History</string>
+    <string name="nav_chart">Chart</string>
+    <string name="nav_settings">Settings</string>
 </resources>
