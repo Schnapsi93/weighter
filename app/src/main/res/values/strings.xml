@@ -4,6 +4,7 @@
     <string name="nav_history">History</string>
     <string name="nav_chart">Chart</string>
     <string name="nav_settings">Settings</string>
+
     <!-- Add weight screen -->
     <string name="add_weight_label">Weight</string>
     <string name="add_weight_unit">kg</string>
@@ -36,4 +37,18 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
     <string name="action_ok">OK</string>
+
+    <!-- Chart screen -->
+    <string name="chart_range_30">30 days</string>
+    <string name="chart_range_90">90 days</string>
+    <string name="chart_range_365">1 year</string>
+    <string name="chart_range_all">All</string>
+    <string name="chart_not_enough_data">Add at least two entries in this period to see the chart.</string>
+    <string name="chart_stats_title">Statistics</string>
+    <string name="chart_stat_latest">Latest</string>
+    <string name="chart_stat_change">Change in period</string>
+    <string name="chart_stat_lowest">Lowest</string>
+    <string name="chart_stat_highest">Highest</string>
+    <string name="chart_stat_average">Average</string>
+    <string name="chart_stat_std_dev">Standard deviation</string>
 </resources>
