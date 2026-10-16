@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 android {
@@ -34,6 +36,22 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+/*
+ * Room writes a JSON description of the database schema into app/schemas/
+ * for every database version. Commit these files to git – they are needed
+ * to write and test migrations when the table structure changes later.
+ */
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    // ...existing dependencies...
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
 
 dependencies {
