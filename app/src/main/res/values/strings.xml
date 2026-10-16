@@ -19,4 +19,21 @@
     <string name="error_weight_not_number">That is not a valid number.</string>
     <string name="error_weight_out_of_range">Weight must be between %1$d and %2$d kg.</string>
     <string name="error_save_failed">Saving failed. Please try again.</string>
+
+    <!-- History screen -->
+    <string name="history_empty">No entries yet.\nYour saved weights will appear here.</string>
+    <string name="history_add">Add entry</string>
+    <string name="history_deleted">Entry from %1$s deleted</string>
+    <string name="history_undo">Undo</string>
+
+    <!-- Entry editor dialog -->
+    <string name="editor_title_add">Add entry</string>
+    <string name="editor_title_edit">Edit entry</string>
+    <string name="editor_replaces_warning">An entry for this day already exists (%1$s) and will be replaced.</string>
+
+    <!-- Common actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_ok">OK</string>
 </resources>

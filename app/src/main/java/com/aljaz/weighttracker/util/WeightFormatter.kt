@@ -25,4 +25,11 @@ object WeightFormatter {
 
     // Note: DecimalFormat is created per call on purpose – it is not thread-safe,
     // so sharing one instance could produce wrong output in background work.
+
+    /**
+     * Formats a weight for an editable text field, without unit,
+     * e.g. `79.5` → "79,5". Used to pre-fill the field when editing.
+     */
+    fun formatForInput(weightKg: Double): String =
+        DecimalFormat("0.##").format(weightKg)
 }

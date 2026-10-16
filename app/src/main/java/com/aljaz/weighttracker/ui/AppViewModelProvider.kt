@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.aljaz.weighttracker.WeightTrackerApp
 import com.aljaz.weighttracker.ui.screens.add.AddWeightViewModel
+import com.aljaz.weighttracker.ui.screens.history.HistoryViewModel
 
 /**
  * Creates every ViewModel in the app with its dependencies from [AppContainer].
@@ -17,6 +18,12 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             AddWeightViewModel(
+                repository = weightTrackerApp().container.weightRepository,
+            )
+        }
+
+        initializer {
+            HistoryViewModel(
                 repository = weightTrackerApp().container.weightRepository,
             )
         }

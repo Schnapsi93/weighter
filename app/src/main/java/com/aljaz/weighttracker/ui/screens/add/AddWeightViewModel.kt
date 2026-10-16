@@ -65,7 +65,7 @@ class AddWeightViewModel(
      * @param newValue The full new text of the field.
      */
     fun onInputChange(newValue: String) {
-        if (INPUT_PATTERN.matches(newValue)) {
+        if (WeightParser.isAllowedInput(newValue)) {
             form.update { it.copy(input = newValue, inputError = null, saveFailed = false) }
         }
     }
@@ -110,8 +110,5 @@ class AddWeightViewModel(
         val saveFailed: Boolean = false,
     )
 
-    private companion object {
-        /** Up to 3 digits, optionally a separator and up to 2 decimals. */
-        val INPUT_PATTERN = Regex("""\d{0,3}([.,]\d{0,2})?""")
-    }
+
 }

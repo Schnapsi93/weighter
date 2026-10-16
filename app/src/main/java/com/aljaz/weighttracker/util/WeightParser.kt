@@ -52,4 +52,12 @@ object WeightParser {
         val rounded = Math.round(value * 100) / 100.0
         return WeightParseResult.Valid(rounded)
     }
+    /**
+     * Returns true if [text] could be (the beginning of) a valid weight:
+     * up to 3 digits, optionally a separator and up to 2 decimals.
+     * Used to ignore keystrokes that can never form a valid weight.
+     */
+    fun isAllowedInput(text: String): Boolean = ALLOWED_INPUT.matches(text)
+
+    private val ALLOWED_INPUT = Regex("""\d{0,3}([.,]\d{0,2})?""")
 }

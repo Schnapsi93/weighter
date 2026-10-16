@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,10 +24,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aljaz.weighttracker.R
 import com.aljaz.weighttracker.model.WeightEntry
 import com.aljaz.weighttracker.ui.AppViewModelProvider
+import com.aljaz.weighttracker.ui.components.WeightTextField
 import com.aljaz.weighttracker.ui.theme.WeightTrackerTheme
 import com.aljaz.weighttracker.util.WeightFormatter
-
-import com.aljaz.weighttracker.util.WeightInputError
 import java.time.LocalDate
 
 /**
@@ -96,22 +90,11 @@ fun AddWeightContent(
 
         TodaySummaryCard(uiState)
 
-        OutlinedTextField(
+        WeightTextField(
             value = uiState.input,
             onValueChange = onInputChange,
-            label = { Text(stringResource(R.string.add_weight_label)) },
-            suffix = { Text(stringResource(R.string.add_weight_unit)) },
-            isError = uiState.inputError != null,
-            // Always present, so the layout doesn't jump when an error appears.
-            supportingText = {
-                uiState.inputError?.let { Text(inputErrorMessage(it)) }
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Done,
-            ),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
+            error = uiState.inputError,
+            onDone = submit,
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -190,22 +173,7 @@ private fun TodaySummaryCard(
     }
 }
 
-/** Returns the user-facing message for a validation [error]. */
-@Composable
-private fun inputErrorMessage(error: WeightInputError): String = when (error) {
-    WeightInputError.EMPTY ->
-        stringResource(R.string.error_weight_empty)
 
-    WeightInputError.NOT_A_NUMBER ->
-        stringResource(R.string.error_weight_not_number)
-
-    WeightInputError.OUT_OF_RANGE ->
-        stringResource(
-            R.string.error_weight_out_of_range,
-            WeightEntry.MIN_WEIGHT_KG.toInt(),
-            WeightEntry.MAX_WEIGHT_KG.toInt(),
-        )
-}
 
 /** Design-time preview with sample data (shown in the Split/Design view). */
 @Preview(showBackground = true)
