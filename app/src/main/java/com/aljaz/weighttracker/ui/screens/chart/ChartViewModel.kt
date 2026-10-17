@@ -27,7 +27,7 @@ class ChartViewModel(
     val editor = WeightEditorController(repository, viewModelScope, today)
 
     /** The range chosen by the user. */
-    private val selectedRange = MutableStateFlow(ChartRange.DAYS_30)
+    private val selectedRange = MutableStateFlow(ChartRange.ALL)
 
     /** Complete screen state; updates when data, range or dialog state changes. */
     val uiState: StateFlow<ChartUiState> =

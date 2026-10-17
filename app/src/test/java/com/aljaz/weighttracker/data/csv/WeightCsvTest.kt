@@ -58,4 +58,11 @@ class WeightCsvTest {
         val result = WeightCsv.parse("2026-10-16,79.5\n2026-10-15,80\n")
         assertEquals(listOf(day1, day2), result.entries.map { it.date })
     }
+
+    @Test
+    fun parse_emptyWeight_isIgnoredNotSkipped() {
+        val result = WeightCsv.parse("date,weight_kg\n2026-08-18,64.4\n2026-08-19,\n2026-08-20;\n2026-08-21,63.9")
+        assertEquals(listOf(LocalDate.of(2026, 8, 18), LocalDate.of(2026, 8, 21)), result.entries.map { it.date })
+        assertEquals(emptyList<Int>(), result.skippedLines)
+    }
 }

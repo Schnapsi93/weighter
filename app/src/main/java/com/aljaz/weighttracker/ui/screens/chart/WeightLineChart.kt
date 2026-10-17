@@ -24,6 +24,13 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 
 /*
  * This is the ONLY file in the app that uses the Vico chart library.
@@ -34,10 +41,13 @@ import kotlin.math.max
 /** Approximate number of date labels shown on the x-axis. */
 private const val TARGET_X_LABELS = 4
 
+/** Indices of series that contain a single day; only these get a visible point. */
+private val IsolatedSeriesKey = ExtraStore.Key<Set<Int>>()
+
 /**
  * Line chart of weight over time.
  *
- * - x-axis: dates (as epoch days, so missing days appear as gaps)
+ * - x-axis: dates (as epoch days, …so missing days break the line)
  * - y-axis: weight in kg, zoomed to the data instead of starting at 0
  * - the whole range always fits on screen (no scrolling)
  *
@@ -54,13 +64,42 @@ fun WeightLineChart(
 
     LaunchedEffect(entries) {
         if (entries.isEmpty()) return@LaunchedEffect
+        val segments = splitIntoSegments(entries)
         modelProducer.runTransaction {
             lineModel {
-                series(
-                    entries.map { it.date.toEpochDay() },
-                    entries.map { it.weightKg },
-                )
+                // One series per run of consecutive days, so the line breaks at missing days.
+                segments.forEach { segment ->
+                    series(
+                        segment.map { it.date.toEpochDay() },
+                        segment.map { it.weightKg },
+                    )
+                }
             }
+            // Single-day segments have no line to draw, so they need a point to be visible.
+            extras { store ->
+                store[IsolatedSeriesKey] = segments.indices.filter { segments[it].size == 1 }.toSet()
+            }
+        }
+    }
+
+    // All series share one color, so together they look like one interrupted line.
+    val color = MaterialTheme.colorScheme.primary
+    val lineFill = remember(color) { LineCartesianLayer.LineFill.single(Fill(color)) }
+    val pointComponent = rememberShapeComponent(fill = Fill(color), shape = CircleShape)
+
+    val plainLine = LineCartesianLayer.rememberLine(fill = lineFill)
+    val isolatedDayLine = LineCartesianLayer.rememberLine(
+        fill = lineFill,
+        pointProvider = remember(pointComponent) {
+            LineCartesianLayer.PointProvider.single(LineCartesianLayer.Point(pointComponent, 6.dp))
+        },
+    )
+
+    // Chooses the style per series: a point only for isolated days.
+    val lineProvider = remember(plainLine, isolatedDayLine) {
+        LineCartesianLayer.LineProvider { _, seriesIndex, extraStore ->
+            val isolated = extraStore.getOrNull(IsolatedSeriesKey).orEmpty()
+            if (seriesIndex in isolated) isolatedDayLine else plainLine
         }
     }
 
@@ -74,7 +113,10 @@ fun WeightLineChart(
 
     CartesianChartHost(
         chart = rememberCartesianChart(
-            rememberLineCartesianLayer(rangeProvider = WeightRangeProvider),
+            rememberLineCartesianLayer(
+                lineProvider = lineProvider,
+                rangeProvider = WeightRangeProvider,
+            ),
             startAxis = VerticalAxis.rememberStart(valueFormatter = WeightAxisFormatter),
             bottomAxis = HorizontalAxis.rememberBottom(
                 valueFormatter = DateAxisFormatter,
@@ -96,8 +138,8 @@ fun WeightLineChart(
  * with 5 kg of padding – so small changes are clearly visible.
  */
 private val WeightRangeProvider = object : CartesianLayerRangeProvider {
-    override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = floor(minY ) - 5
-    override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) = ceil(maxY ) + 5
+    override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = floor(minY ) - 1
+    override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) = ceil(maxY ) + 1
 }
 
 /** y-axis labels: weight without unit, e.g. "79,5". */
@@ -111,4 +153,21 @@ private val dateLabelFormat = DateTimeFormatter.ofPattern("d. MMM")
 /** x-axis labels: converts an epoch-day x-value back into a short date. */
 private val DateAxisFormatter = CartesianValueFormatter { _, value, _ ->
     LocalDate.ofEpochDay(value.toLong()).format(dateLabelFormat)
+}
+
+/**
+ * Splits [entries] (oldest first) into runs of consecutive days.
+ * A new run starts wherever at least one day has no entry.
+ *
+ * Example: 18., 19., 21., 22. Aug → [[18., 19.], [21., 22.]]
+ */
+internal fun splitIntoSegments(entries: List<WeightEntry>): List<List<WeightEntry>> {
+    val segments = mutableListOf<MutableList<WeightEntry>>()
+    for (entry in entries) {
+        val current = segments.lastOrNull()
+        val isNextDay = current != null &&
+                entry.date.toEpochDay() - current.last().date.toEpochDay() == 1L
+        if (isNextDay) current!!.add(entry) else segments.add(mutableListOf(entry))
+    }
+    return segments
 }

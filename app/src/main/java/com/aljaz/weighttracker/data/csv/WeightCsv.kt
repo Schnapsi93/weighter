@@ -16,6 +16,7 @@ import java.time.format.DateTimeParseException
  * 2026-10-16,79.5
  * ```
  * Reading is tolerant: it also accepts `;` as separator with a decimal comma
+ * days with an empty weight (skipped silently)
  * (what Excel saves on Slovenian systems), a header row, blank lines,
  * quotes around values, and a leading byte-order mark.
  */
@@ -49,6 +50,18 @@ object WeightCsv {
         }
     }
 
+    /** What a single CSV line turned out to contain. */
+    private sealed interface LineResult {
+        /** A valid date with a valid weight. */
+        data class Entry(val entry: WeightEntry) : LineResult
+
+        /** A valid date with no weight, e.g. "2026-08-19,": a day without a measurement. */
+        data object EmptyDay : LineResult
+
+        /** Anything that can't be read safely (or the header row). */
+        data object Invalid : LineResult
+    }
+
     /**
      * Reads entries from CSV [text].
      *
@@ -64,11 +77,10 @@ object WeightCsv {
             val line = rawLine.trim()
             if (line.isEmpty()) return@forEachIndexed
 
-            val entry = parseLine(line)
-            when {
-                entry != null -> byDate[entry.date] = entry
-                isHeader(line) -> Unit  // header row: ignore silently
-                else -> skipped += index + 1
+            when (val result = parseLine(line)) {
+                is LineResult.Entry -> byDate[result.entry.date] = result.entry
+                LineResult.EmptyDay -> Unit  // no measurement that day: nothing to import
+                LineResult.Invalid -> if (!isHeader(line)) skipped += index + 1
             }
         }
 
@@ -79,30 +91,34 @@ object WeightCsv {
     }
 
     /**
-     * Parses one data line, or returns null if it is not a valid entry.
+     * Parses one data line.
      *
      * The separator is `;` if the line contains one, otherwise `,`.
-     * Exactly two non-empty fields are required (trailing empty fields, which
-     * Excel sometimes adds, are allowed). This rejects "2026-10-16,79,5":
-     * with a comma separator the decimal comma makes the line ambiguous.
+     * A valid date followed by an empty weight ("2026-08-19," or just
+     * "2026-08-19") is a day without a measurement, not an error.
+     * More than two non-empty fields are rejected, so "2026-10-16,79,5"
+     * (ambiguous decimal comma) is never guessed.
      */
-    private fun parseLine(line: String): WeightEntry? {
+    private fun parseLine(line: String): LineResult {
         val separator = if (';' in line) ';' else ','
         val fields = line.split(separator)
             .map { it.trim().removeSurrounding("\"") }
             .filterIndexed { index, field -> index < 2 || field.isNotEmpty() }
-        if (fields.size != 2) return null
+        if (fields.size !in 1..2) return LineResult.Invalid
 
         val date = try {
             LocalDate.parse(fields[0])
         } catch (e: DateTimeParseException) {
-            return null
+            return LineResult.Invalid
         }
 
+        val weightText = fields.getOrNull(1).orEmpty()
+        if (weightText.isEmpty()) return LineResult.EmptyDay
+
         // Reuses the same validation as typed input (range check, comma or dot).
-        return when (val weight = WeightParser.parse(fields[1])) {
-            is WeightParseResult.Valid -> WeightEntry(date, weight.weightKg)
-            is WeightParseResult.Invalid -> null
+        return when (val weight = WeightParser.parse(weightText)) {
+            is WeightParseResult.Valid -> LineResult.Entry(WeightEntry(date, weight.weightKg))
+            is WeightParseResult.Invalid -> LineResult.Invalid
         }
     }
 

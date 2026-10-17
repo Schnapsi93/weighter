@@ -19,7 +19,7 @@ import kotlin.math.sqrt
  * @property editor State of the add/edit dialog, or null when closed.
  */
 data class ChartUiState(
-    val selectedRange: ChartRange = ChartRange.DAYS_30,
+    val selectedRange: ChartRange = ChartRange.ALL,
     val entries: List<WeightEntry> = emptyList(),
     val stats: ChartStats? = null,
     val todayEntry: WeightEntry? = null,
