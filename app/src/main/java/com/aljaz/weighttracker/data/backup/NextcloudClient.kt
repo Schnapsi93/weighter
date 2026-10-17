@@ -37,8 +37,11 @@ class NextcloudClient(
     }
 
     /**
-     * Uploads [content] as [fileName] into [folder], creating the folder if
-     * needed. An existing file with the same name is overwritten.
+     * Uploads [content] as [fileName] into [folder], creating the folder
+     * (and any missing parent folders) if needed. An existing file with
+     * the same name is overwritten.
+     *
+     * @param folder Path relative to the user's root, e.g. "myapps/weighter/backups".
      */
     suspend fun upload(
         config: NextcloudConfig,
@@ -48,11 +51,8 @@ class NextcloudClient(
     ): NextcloudResult {
         val folderUrl = folderUrl(config, folder) ?: return failure(BackupError.INVALID_URL)
 
-        // 1) Create the folder (MKCOL). 201 = created, 405 = already exists: both fine.
-        val createFolder = authorizedRequest(config).url(folderUrl).method("MKCOL", null).build()
-        val folderResult = execute(createFolder) { code ->
-            code == HTTP_CREATED || code == HTTP_METHOD_NOT_ALLOWED
-        }
+        // 1) Make sure every folder level exists.
+        val folderResult = createFolders(config, folder)
         if (folderResult is NextcloudResult.Failure) return folderResult
 
         // 2) Upload the file (PUT). 201 = new file, 204 = replaced existing file.
@@ -62,6 +62,25 @@ class NextcloudClient(
             .put(content.toRequestBody(CSV_MEDIA_TYPE))
             .build()
         return execute(upload) { code -> code == HTTP_CREATED || code == HTTP_NO_CONTENT }
+    }
+
+    /**
+     * Creates [folder] level by level ("myapps", then "myapps/weighter", …),
+     * because WebDAV's MKCOL cannot create several levels at once.
+     * 201 = created, 405 = already exists: both count as success.
+     */
+    private suspend fun createFolders(config: NextcloudConfig, folder: String): NextcloudResult {
+        val segments = pathSegments(folder)
+        for (depth in 1..segments.size) {
+            val levelUrl = folderUrl(config, segments.take(depth).joinToString("/"))
+                ?: return failure(BackupError.INVALID_URL)
+            val request = authorizedRequest(config).url(levelUrl).method("MKCOL", null).build()
+            val result = execute(request) { code ->
+                code == HTTP_CREATED || code == HTTP_METHOD_NOT_ALLOWED
+            }
+            if (result is NextcloudResult.Failure) return result
+        }
+        return NextcloudResult.Success
     }
 
     /** Starts a request with HTTP Basic authentication. */
@@ -123,9 +142,20 @@ class NextcloudClient(
         internal fun userRootUrl(config: NextcloudConfig): HttpUrl? =
             davFilesBuilder(config)?.addPathSegment("")?.build()
 
-        /** `<server>/remote.php/dav/files/<username>/<folder>`. */
-        internal fun folderUrl(config: NextcloudConfig, folder: String): HttpUrl? =
-            davFilesBuilder(config)?.addPathSegment(folder)?.build()
+        /**
+         * `<server>/remote.php/dav/files/<username>/<folder>`.
+         * [folder] may contain "/" for nested folders; each level is
+         * encoded separately, so the slashes stay real path separators.
+         */
+        internal fun folderUrl(config: NextcloudConfig, folder: String): HttpUrl? {
+            val builder = davFilesBuilder(config) ?: return null
+            pathSegments(folder).forEach { builder.addPathSegment(it) }
+            return builder.build()
+        }
+
+        /** Splits "a/b/c" into ["a", "b", "c"], ignoring empty parts like "a//b/". */
+        private fun pathSegments(folder: String): List<String> =
+            folder.split('/').filter { it.isNotBlank() }
 
         /**
          * Builds the common URL prefix. Path segments are added one by one,

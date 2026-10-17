@@ -65,13 +65,13 @@ class BackupManager(
     }
 
     companion object {
-        /** Folder in the user's Nextcloud where backups are stored. */
         /**
-         * Folder in the user's Nextcloud where backups are stored.
+         * Folder in the user's Nextcloud where backups are stored. (nested levels allowed).
          * Debug builds use a separate folder so test data never
          * overwrites real backups.
          */
-        val BACKUP_FOLDER = if (BuildConfig.DEBUG) "Weighter-debug" else "Weighter"
+        val BACKUP_FOLDER = if (BuildConfig.DEBUG)
+            "myapps/weighter/backups-debug" else "myapps/weighter/backups"
 
         /** Backup file name for the month of [date], e.g. "weight-tracker-2026-10.csv". */
         fun fileNameFor(date: LocalDate): String =

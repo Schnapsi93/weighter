@@ -60,4 +60,12 @@ class NextcloudUrlTest {
             BackupManager.fileNameFor(LocalDate.of(2026, 10, 16)),
         )
     }
+
+    @Test
+    fun folderUrl_supportsNestedFolders() {
+        assertEquals(
+            "https://cloud.example.com/remote.php/dav/files/aljaz/myapps/weighter/backups",
+            NextcloudClient.folderUrl(config("https://cloud.example.com"), "myapps/weighter/backups").toString(),
+        )
+    }
 }

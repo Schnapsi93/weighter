@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark-mode version of the app theme. Only affects the window behind
+         Compose, mainly visible as the background while the app starts. -->
+    <style name="Theme.WeightTracker" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/startup_background_dark</item>
+    </style>
+</resources>

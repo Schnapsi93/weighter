@@ -20,11 +20,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aljaz.weighttracker.R
@@ -32,7 +36,15 @@ import com.aljaz.weighttracker.ui.components.WeightTextField
 import com.aljaz.weighttracker.util.WeightFormatter
 import com.aljaz.weighttracker.util.toUtcMillis
 import com.aljaz.weighttracker.util.utcMillisToLocalDate
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalWindowInfo
+import kotlinx.coroutines.flow.first
 
 /**
  * Dialog for adding a new entry or editing an existing one.
@@ -55,9 +67,11 @@ fun WeightEditorDialog(
     onSave: () -> Unit,
     onDelete: (() -> Unit)? = null,
     onDismiss: () -> Unit,
+    autoFocusWeight: Boolean = false
 ) {
     // Pure UI state (is the calendar open?), so it lives here, not in the ViewModel.
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var weightFocusRequester = remember {FocusRequester()}
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -70,6 +84,17 @@ fun WeightEditorDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                if (autoFocusWeight){
+                    // The dialog has its own window. The keyboard only opens reliably
+                    // once that window has focus, so we wait for it before focusing the field.
+                    val windowInfo = LocalWindowInfo.current
+                    LaunchedEffect(Unit) {
+                        snapshotFlow { windowInfo.isWindowFocused }.first{ it }
+                        weightFocusRequester.requestFocus()
+                    }
+                }
+
                 if (state.isNewEntry) {
                     OutlinedButton(
                         onClick = { showDatePicker = true },
@@ -91,7 +116,10 @@ fun WeightEditorDialog(
                     onValueChange = onInputChange,
                     error = state.inputError,
                     onDone = onSave,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(weightFocusRequester),
+
                 )
 
                 state.replacedEntry?.let { existing ->

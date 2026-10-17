@@ -71,6 +71,7 @@ fun ChartScreen(
             onInputChange = viewModel.editor::onInputChange,
             onSave = viewModel.editor::save,
             onDismiss = viewModel.editor::dismiss,
+            autoFocusWeight = true,
         )
     }
 }
